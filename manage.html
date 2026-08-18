@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>網站內容維護 | 多物理分析與應用力學實驗室</title>
+  <link rel="stylesheet" href="assets/css/manage.css?v=20260818-1">
+</head>
+<body>
+  <header class="manage-header"><div><strong>實驗室網站內容維護</strong><span>不需要修改 HTML，填完表單後儲存即可</span></div><a href="index.html" target="_blank">開啟網站預覽 ↗</a></header>
+  <main class="manage-layout">
+    <aside>
+      <div class="steps"><b>第一次使用</b><ol><li>使用 Chrome 或 Edge 開啟本頁</li><li>按「選擇網站資料夾」</li><li>選擇含有 index.html 的資料夾</li><li>修改後按「儲存並預覽」</li></ol></div>
+      <nav id="section-nav" aria-label="維護項目"></nav>
+    </aside>
+    <section class="editor-area">
+      <div id="notice" class="notice">目前修改會自動暫存在這台電腦；按下儲存後才會寫入網站資料檔。</div>
+      <div id="editor"></div>
+    </section>
+  </main>
+  <footer class="action-bar">
+    <button id="choose-folder" class="secondary">選擇網站資料夾</button>
+    <span id="folder-status">尚未選擇</span>
+    <span class="spacer"></span>
+    <button id="discard" class="quiet">放棄暫存修改</button>
+    <label class="button secondary">匯入備份<input id="import-file" type="file" accept=".js,.json" hidden></label>
+    <button id="download" class="secondary">下載資料檔</button>
+    <button id="save" class="primary">儲存並預覽</button>
+  </footer>
+  <script src="assets/data/site-data.js?v=20260818-3"></script>
+  <script src="assets/js/manage.js?v=20260818-1"></script>
+</body>
+</html>
