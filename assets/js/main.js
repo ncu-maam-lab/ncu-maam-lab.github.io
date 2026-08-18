@@ -57,7 +57,6 @@
   document.addEventListener('DOMContentLoaded',()=>{
     document.documentElement.lang='zh-Hant'; renderProfessor();renderMembers();renderPublications();renderActivities();renderContact();
     const toggle=document.querySelector('.nav-toggle'),nav=document.querySelector('.nav-links');if(toggle&&nav){toggle.onclick=()=>{const open=nav.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));};nav.querySelectorAll('a').forEach(a=>a.onclick=()=>nav.classList.remove('open'));}
-    document.querySelectorAll('.footer-links').forEach(links=>{if(!links.querySelector('[href="manage.html"]'))links.insertAdjacentHTML('beforeend','<a href="manage.html">網站維護</a>');});
     document.querySelectorAll('[data-year]').forEach(el=>el.textContent=new Date().getFullYear());initSlider();
   });
 })();
