@@ -21,6 +21,10 @@
 python -m http.server 8000
 ```
 
-網站：<http://localhost:8000/>
+正式網站：<https://ncu-maam-lab.github.io/>
 
-維護入口：<http://localhost:8000/manage.html>
+正式維護入口：<https://ncu-maam-lab.github.io/manage.html>
+
+本機預覽網站：<http://localhost:8000/>
+
+本機維護入口：<http://localhost:8000/manage.html>
