@@ -9,13 +9,13 @@
     const card = document.querySelector('.person-card');
     if (card) card.innerHTML = `<img class="faculty-photo" src="${esc(p.image)}" alt="${esc(p.name)} ${esc(p.title)}"><div><h3 style="margin:0 0 6px">${esc(p.name)} ${esc(p.englishName)}</h3><div class="meta">${esc(p.title)} · ${esc(p.department)}</div><div class="interest-block"><strong>研究專長</strong><div class="interest-tags">${tags(p.interests).map(x => `<span class="interest-tag">${esc(x)}</span>`).join('')}</div></div><div class="faculty-details"><div class="detail-row"><strong>辦公室</strong><span>${esc(c.office)}</span></div><div class="detail-row"><strong>專線電話</strong><a href="tel:${esc(c.directTel)}">${esc(c.directTel)}</a></div><div class="detail-row"><strong>校內分機</strong><span>${esc(c.campusExtension)}</span></div><div class="detail-row"><strong>實驗室分機</strong><span>${esc(c.labExtension)}</span></div><div class="detail-row"><strong>傳真電話</strong><span>${esc(c.fax)}</span></div><div class="detail-row"><strong>E-mail</strong><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div></div><div class="faculty-background"><div><strong>學歷</strong><p>${esc(p.education)}</p></div><div><strong>經歷</strong><p>${esc(p.experience)}</p></div><div><strong>教授課程</strong><p>${esc(p.courses)}</p></div></div></div>`;
     const home = document.querySelector('.home-professor-card');
-    if (home) home.innerHTML = `<img class="home-professor-photo" src="${esc(p.image)}" alt="${esc(p.name)}${esc(p.title)}" decoding="async"><div class="home-professor-content"><span class="eyebrow">指導教授</span><h2 class="section-title">${esc(p.name)} ${esc(p.title)}</h2><p class="home-professor-role">${esc(p.department)}</p><p class="home-professor-description">${esc(p.description)}</p><div class="interest-tags home-professor-tags">${tags(p.interests).map(x => `<span class="interest-tag">${esc(x)}</span>`).join('')}</div><a class="card-link home-professor-link" href="members.html">查看教師與成員資料 →</a></div>`;
+    if (home) home.innerHTML = `<img class="home-professor-photo" src="${esc(p.image)}" alt="${esc(p.name)}${esc(p.title)}" decoding="async"><div class="home-professor-content"><span class="eyebrow">指導教授</span><h2 class="section-title">${esc(p.name)} ${esc(p.title)}</h2><p class="home-professor-role">${esc(p.department)}</p><p class="home-professor-description">${esc(p.description)}</p><div class="interest-tags home-professor-tags">${tags(p.interests).map(x => `<span class="interest-tag">${esc(x)}</span>`).join('')}</div></div>`;
   }
 
   function renderMembers() {
     const grids = document.querySelectorAll('.member-grid');
     if (grids[0]) grids[0].innerHTML = data.members.map(name => `<article class="member-card"><div><span class="tag">研究生</span></div><h3>${esc(name)}</h3></article>`).join('');
-    if (grids[1]) grids[1].innerHTML = data.alumni.map(x => `<article class="member-card"><div><span class="tag">碩士畢業</span><span class="member-id">${esc(x.year)}</span></div><h3>${esc(x.name)}</h3><strong class="thesis-label">碩士論文</strong><p class="thesis-title">${esc(x.thesis)}</p></article>`).join('');
+    if (grids[1]) grids[1].innerHTML = data.alumni.map(x => `<article class="member-card"><div><span class="tag">碩士畢業</span></div><h3>${esc(x.name)}</h3><strong class="thesis-label">碩士論文</strong><p class="thesis-title">${esc(x.thesis)}</p></article>`).join('');
     const honors = document.querySelector('.honor-list');
     if (honors) honors.innerHTML = data.honors.map(x => `<div class="honor-item"><span class="tag">${esc(x.year)}</span><p>${esc(x.text)}</p></div>`).join('');
   }
@@ -25,7 +25,7 @@
     if (projects) projects.innerHTML = data.projects.map(x => `<article class="project-item"><div><span class="tag">${esc(x.role)}</span><span class="project-period">${esc(x.period)}</span></div><h3>${esc(x.title)}</h3><p>${esc(x.sponsor)} · ${esc(x.amount)}</p></article>`).join('');
     const lists = document.querySelectorAll('.publication-list');
     if (lists[0]) lists[0].innerHTML = data.journals.map(x => `<article class="publication-item"><span class="tag">${esc(x.tag)}</span><h3>${esc(x.title)}</h3><p>${esc(x.citation)}</p></article>`).join('');
-    if (lists[1]) lists[1].innerHTML = [...data.alumni].reverse().map(x => `<article class="publication-item"><span class="tag">${esc(x.year)}</span><h3>${esc(x.thesis)}</h3><p>${esc(x.name)}</p></article>`).join('');
+    if (lists[1]) lists[1].innerHTML = [...data.alumni].reverse().map(x => `<article class="publication-item"><h3>${esc(x.thesis)}</h3><p>${esc(x.name)}</p></article>`).join('');
   }
 
   function renderActivities() {
@@ -45,18 +45,80 @@
 
   function initSlider() {
     document.querySelectorAll('[data-activity-slider]').forEach(slider => {
-      const slides=[...slider.querySelectorAll('.activity-slide')], box=slider.querySelector('[data-slider-dots]'); if(!slides.length||!box)return;
-      let current=0,timer; box.innerHTML='';
-      const dots=slides.map((_,i)=>{const b=document.createElement('button');b.type='button';b.className='slider-dot';b.setAttribute('aria-label',`切換至第 ${i+1} 張活動照片`);b.onclick=()=>{show(i);start();};box.appendChild(b);return b;});
-      const show=i=>{current=(i+slides.length)%slides.length;slides.forEach((s,n)=>{const on=n===current;s.classList.toggle('active',on);s.setAttribute('aria-hidden',on?'false':'true');s.tabIndex=on?0:-1;dots[n].classList.toggle('active',on);});};
-      const start=()=>{clearInterval(timer);if(slides.length>1)timer=setInterval(()=>show(current+1),4000);};
-      slider.querySelector('[data-slider-prev]')?.addEventListener('click',()=>{show(current-1);start();}); slider.querySelector('[data-slider-next]')?.addEventListener('click',()=>{show(current+1);start();}); slider.addEventListener('mouseenter',()=>clearInterval(timer));slider.addEventListener('mouseleave',start);show(0);start();
+      const slides = [...slider.querySelectorAll('.activity-slide')];
+      const box = slider.querySelector('[data-slider-dots]');
+      if (!slides.length || !box) return;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let current = 0, timer, paused = reducedMotion.matches;
+      const pause = document.createElement('button');
+      pause.type = 'button';
+      pause.className = 'slider-pause';
+      slider.appendChild(pause);
+      const updatePause = () => {
+        pause.textContent = paused ? '播放輪播' : '暫停輪播';
+        pause.setAttribute('aria-label', paused ? '播放活動照片輪播' : '暫停活動照片輪播');
+        pause.setAttribute('aria-pressed', String(paused));
+      };
+      box.innerHTML = '';
+      const dots = slides.map((_, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'slider-dot';
+        b.setAttribute('aria-label', `切換至第 ${i + 1} 張活動照片`);
+        b.addEventListener('click', () => { show(i); start(); });
+        box.appendChild(b);
+        return b;
+      });
+      const show = i => {
+        current = (i + slides.length) % slides.length;
+        slides.forEach((slide, n) => {
+          const on = n === current;
+          slide.classList.toggle('active', on);
+          slide.setAttribute('aria-hidden', String(!on));
+          slide.tabIndex = on ? 0 : -1;
+          dots[n].classList.toggle('active', on);
+          dots[n].setAttribute('aria-current', String(on));
+        });
+      };
+      const start = () => {
+        clearInterval(timer);
+        if (slides.length > 1 && !paused && !document.hidden && !slider.matches(':hover') && !slider.contains(document.activeElement)) {
+          timer = setInterval(() => show(current + 1), 5000);
+        }
+      };
+      pause.addEventListener('click', () => { paused = !paused; updatePause(); start(); });
+      slider.querySelector('[data-slider-prev]')?.addEventListener('click', () => { show(current - 1); start(); });
+      slider.querySelector('[data-slider-next]')?.addEventListener('click', () => { show(current + 1); start(); });
+      slider.addEventListener('mouseenter', () => clearInterval(timer));
+      slider.addEventListener('mouseleave', start);
+      slider.addEventListener('focusin', () => clearInterval(timer));
+      slider.addEventListener('focusout', () => setTimeout(start, 0));
+      document.addEventListener('visibilitychange', start);
+      reducedMotion.addEventListener('change', e => { paused = e.matches; updatePause(); start(); });
+      show(0); updatePause(); start();
     });
   }
 
-  document.addEventListener('DOMContentLoaded',()=>{
-    document.documentElement.lang='zh-Hant'; renderProfessor();renderMembers();renderPublications();renderActivities();renderContact();
-    const toggle=document.querySelector('.nav-toggle'),nav=document.querySelector('.nav-links');if(toggle&&nav){toggle.onclick=()=>{const open=nav.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));};nav.querySelectorAll('a').forEach(a=>a.onclick=()=>nav.classList.remove('open'));}
-    document.querySelectorAll('[data-year]').forEach(el=>el.textContent=new Date().getFullYear());initSlider();
+  document.addEventListener('DOMContentLoaded', () => {
+    document.documentElement.lang = 'zh-Hant';
+    renderProfessor(); renderMembers(); renderPublications(); renderActivities(); renderContact();
+    const toggle = document.querySelector('.nav-toggle');
+    const nav = document.querySelector('.nav-links');
+    if (toggle && nav) {
+      const setOpen = open => {
+        nav.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? '關閉選單' : '開啟選單');
+      };
+      toggle.addEventListener('click', () => setOpen(!nav.classList.contains('open')));
+      nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setOpen(false)));
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && nav.classList.contains('open')) { setOpen(false); toggle.focus(); }
+      });
+      document.addEventListener('click', e => { if (!nav.contains(e.target) && !toggle.contains(e.target)) setOpen(false); });
+      window.matchMedia('(min-width: 981px)').addEventListener('change', e => { if (e.matches) setOpen(false); });
+    }
+    document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date().getFullYear());
+    initSlider();
   });
 })();
