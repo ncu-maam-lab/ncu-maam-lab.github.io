@@ -45,18 +45,129 @@
 
   function initSlider() {
     document.querySelectorAll('[data-activity-slider]').forEach(slider => {
-      const slides=[...slider.querySelectorAll('.activity-slide')], box=slider.querySelector('[data-slider-dots]'); if(!slides.length||!box)return;
-      let current=0,timer; box.innerHTML='';
-      const dots=slides.map((_,i)=>{const b=document.createElement('button');b.type='button';b.className='slider-dot';b.setAttribute('aria-label',`切換至第 ${i+1} 張活動照片`);b.onclick=()=>{show(i);start();};box.appendChild(b);return b;});
-      const show=i=>{current=(i+slides.length)%slides.length;slides.forEach((s,n)=>{const on=n===current;s.classList.toggle('active',on);s.setAttribute('aria-hidden',on?'false':'true');s.tabIndex=on?0:-1;dots[n].classList.toggle('active',on);});};
-      const start=()=>{clearInterval(timer);if(slides.length>1)timer=setInterval(()=>show(current+1),4000);};
-      slider.querySelector('[data-slider-prev]')?.addEventListener('click',()=>{show(current-1);start();}); slider.querySelector('[data-slider-next]')?.addEventListener('click',()=>{show(current+1);start();}); slider.addEventListener('mouseenter',()=>clearInterval(timer));slider.addEventListener('mouseleave',start);show(0);start();
+      const slides = [...slider.querySelectorAll('.activity-slide')];
+      const box = slider.querySelector('[data-slider-dots]');
+      if (!slides.length || !box) return;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let current = 0, timer, paused = reducedMotion.matches;
+      const pause = document.createElement('button');
+      pause.type = 'button';
+      pause.className = 'slider-pause';
+      slider.appendChild(pause);
+      const updatePause = () => {
+        pause.textContent = paused ? '播放輪播' : '暫停輪播';
+        pause.setAttribute('aria-label', paused ? '播放活動照片輪播' : '暫停活動照片輪播');
+        pause.setAttribute('aria-pressed', String(paused));
+      };
+      box.innerHTML = '';
+      const dots = slides.map((_, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'slider-dot';
+        b.setAttribute('aria-label', `切換至第 ${i + 1} 張活動照片`);
+        b.addEventListener('click', () => { show(i); start(); });
+        box.appendChild(b);
+        return b;
+      });
+      const show = i => {
+        current = (i + slides.length) % slides.length;
+        slides.forEach((slide, n) => {
+          const on = n === current;
+          slide.classList.toggle('active', on);
+          slide.setAttribute('aria-hidden', String(!on));
+          slide.tabIndex = on ? 0 : -1;
+          dots[n].classList.toggle('active', on);
+          dots[n].setAttribute('aria-current', String(on));
+        });
+      };
+      const start = () => {
+        clearInterval(timer);
+        if (slides.length > 1 && !paused && !document.hidden && !slider.matches(':hover') && !slider.contains(document.activeElement)) {
+          timer = setInterval(() => show(current + 1), 5000);
+        }
+      };
+      pause.addEventListener('click', () => { paused = !paused; updatePause(); start(); });
+      slider.querySelector('[data-slider-prev]')?.addEventListener('click', () => { show(current - 1); start(); });
+      slider.querySelector('[data-slider-next]')?.addEventListener('click', () => { show(current + 1); start(); });
+      slider.addEventListener('mouseenter', () => clearInterval(timer));
+      slider.addEventListener('mouseleave', start);
+      slider.addEventListener('focusin', () => clearInterval(timer));
+      slider.addEventListener('focusout', () => setTimeout(start, 0));
+      document.addEventListener('visibilitychange', start);
+      reducedMotion.addEventListener('change', e => { paused = e.matches; updatePause(); start(); });
+      show(0); updatePause(); start();
     });
   }
 
-  document.addEventListener('DOMContentLoaded',()=>{
-    document.documentElement.lang='zh-Hant'; renderProfessor();renderMembers();renderPublications();renderActivities();renderContact();
-    const toggle=document.querySelector('.nav-toggle'),nav=document.querySelector('.nav-links');if(toggle&&nav){toggle.onclick=()=>{const open=nav.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));};nav.querySelectorAll('a').forEach(a=>a.onclick=()=>nav.classList.remove('open'));}
-    document.querySelectorAll('[data-year]').forEach(el=>el.textContent=new Date().getFullYear());initSlider();
+  function initResearchCards() {
+    const showcase = document.querySelector('.research-showcase');
+    if (!showcase) return;
+    const cards = [...showcase.querySelectorAll('.research-card')];
+    let current = 2;
+    const show = index => {
+      current = (index + cards.length) % cards.length;
+      cards.forEach((card, i) => {
+        let offset = (i - current + cards.length) % cards.length;
+        if (offset > 2) offset -= cards.length;
+        card.style.setProperty('--offset', offset);
+        card.style.setProperty('--angle', `${offset * 9}deg`);
+        card.style.setProperty('--rise', `${Math.abs(offset) * 24}px`);
+        card.style.setProperty('--layer', 5 - Math.abs(offset));
+        card.classList.toggle('is-current', i === current);
+        card.setAttribute('aria-pressed', String(i === current));
+      });
+      const selected = cards[current].dataset;
+      showcase.querySelector('[data-research-title]').textContent = selected.title;
+      showcase.querySelector('[data-research-description]').textContent = selected.description;
+      showcase.querySelector('[data-research-link]').href = selected.href;
+      showcase.querySelector('[data-research-count]').textContent = `0${current + 1} / 0${cards.length}`;
+    };
+    cards.forEach((card, i) => {
+      card.addEventListener('click', () => show(i));
+      card.addEventListener('focus', () => show(i));
+      card.addEventListener('keydown', e => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+        e.preventDefault();
+        show(e.key === 'Home' ? 0 : e.key === 'End' ? cards.length - 1 : current + (e.key === 'ArrowRight' ? 1 : -1));
+        cards[current].focus({ preventScroll: true });
+      });
+    });
+    showcase.querySelector('[data-research-prev]').addEventListener('click', () => show(current - 1));
+    showcase.querySelector('[data-research-next]').addEventListener('click', () => show(current + 1));
+    // A short horizontal swipe changes the focused research direction on touch screens.
+    let touchStart;
+    const fan = showcase.querySelector('.research-fan');
+    fan.addEventListener('touchstart', e => { touchStart = { x:e.changedTouches[0].clientX, y:e.changedTouches[0].clientY }; }, { passive:true });
+    fan.addEventListener('touchend', e => {
+      if (!touchStart) return;
+      const dx = e.changedTouches[0].clientX - touchStart.x;
+      const dy = e.changedTouches[0].clientY - touchStart.y;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
+      touchStart = null;
+    }, { passive:true });
+    show(current);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.documentElement.lang = 'zh-Hant';
+    renderProfessor(); renderMembers(); renderPublications(); renderActivities(); renderContact();
+    const toggle = document.querySelector('.nav-toggle');
+    const nav = document.querySelector('.nav-links');
+    if (toggle && nav) {
+      const setOpen = open => {
+        nav.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? '關閉選單' : '開啟選單');
+      };
+      toggle.addEventListener('click', () => setOpen(!nav.classList.contains('open')));
+      nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setOpen(false)));
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && nav.classList.contains('open')) { setOpen(false); toggle.focus(); }
+      });
+      document.addEventListener('click', e => { if (!nav.contains(e.target) && !toggle.contains(e.target)) setOpen(false); });
+      window.matchMedia('(min-width: 981px)').addEventListener('change', e => { if (e.matches) setOpen(false); });
+    }
+    document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date().getFullYear());
+    initSlider(); initResearchCards();
   });
 })();
