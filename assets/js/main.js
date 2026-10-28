@@ -99,55 +99,6 @@
     });
   }
 
-  function initResearchCards() {
-    const showcase = document.querySelector('.research-showcase');
-    if (!showcase) return;
-    const cards = [...showcase.querySelectorAll('.research-card')];
-    let current = 2;
-    const show = index => {
-      current = (index + cards.length) % cards.length;
-      cards.forEach((card, i) => {
-        let offset = (i - current + cards.length) % cards.length;
-        if (offset > 2) offset -= cards.length;
-        card.style.setProperty('--offset', offset);
-        card.style.setProperty('--angle', `${offset * 9}deg`);
-        card.style.setProperty('--rise', `${Math.abs(offset) * 24}px`);
-        card.style.setProperty('--layer', 5 - Math.abs(offset));
-        card.classList.toggle('is-current', i === current);
-        card.setAttribute('aria-pressed', String(i === current));
-      });
-      const selected = cards[current].dataset;
-      showcase.querySelector('[data-research-title]').textContent = selected.title;
-      showcase.querySelector('[data-research-description]').textContent = selected.description;
-      showcase.querySelector('[data-research-link]').href = selected.href;
-      showcase.querySelector('[data-research-count]').textContent = `0${current + 1} / 0${cards.length}`;
-    };
-    cards.forEach((card, i) => {
-      card.addEventListener('click', () => show(i));
-      card.addEventListener('focus', () => show(i));
-      card.addEventListener('keydown', e => {
-        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
-        e.preventDefault();
-        show(e.key === 'Home' ? 0 : e.key === 'End' ? cards.length - 1 : current + (e.key === 'ArrowRight' ? 1 : -1));
-        cards[current].focus({ preventScroll: true });
-      });
-    });
-    showcase.querySelector('[data-research-prev]').addEventListener('click', () => show(current - 1));
-    showcase.querySelector('[data-research-next]').addEventListener('click', () => show(current + 1));
-    // A short horizontal swipe changes the focused research direction on touch screens.
-    let touchStart;
-    const fan = showcase.querySelector('.research-fan');
-    fan.addEventListener('touchstart', e => { touchStart = { x:e.changedTouches[0].clientX, y:e.changedTouches[0].clientY }; }, { passive:true });
-    fan.addEventListener('touchend', e => {
-      if (!touchStart) return;
-      const dx = e.changedTouches[0].clientX - touchStart.x;
-      const dy = e.changedTouches[0].clientY - touchStart.y;
-      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
-      touchStart = null;
-    }, { passive:true });
-    show(current);
-  }
-
   document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.lang = 'zh-Hant';
     renderProfessor(); renderMembers(); renderPublications(); renderActivities(); renderContact();
@@ -168,6 +119,6 @@
       window.matchMedia('(min-width: 981px)').addEventListener('change', e => { if (e.matches) setOpen(false); });
     }
     document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date().getFullYear());
-    initSlider(); initResearchCards();
+    initSlider();
   });
 })();
